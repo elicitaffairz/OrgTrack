@@ -31,14 +31,6 @@
 4. **Export the Results**: Once the event concludes, go back to the **Files** tab and click "Export to Excel" to download a consolidated spreadsheet of the actual attendees with timestamps.
 5. **End Session**: Click "End Session" in the Dashboard or Files page to securely clear the current event data and prepare for the next event.
 
-## 🎨 HCI Principles Applied
-
-OrgTrack incorporates Human-Computer Interaction (HCI) methodologies:
-- **Visibility of System Status** through real-time analytic dashboards and scan counting.
-- **Error Prevention** via duplicate scan blockers, file format validations, and clear toast notifications.
-- **User Control and Freedom** allowing manual entry overrides for edge cases.
-- **Aesthetic and Minimalist Design** utilizing high-contrast, responsive interfaces built for focus under demanding event entry scenarios.
-
 ## 📦 Setup and Development
 
 To run this application locally:
@@ -46,6 +38,7 @@ To run this application locally:
 ```bash
 # Install dependencies
 npm install
+npm i --save-dev @types/react
 
 # Start the development server
 npm run dev
