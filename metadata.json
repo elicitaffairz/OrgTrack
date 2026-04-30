@@ -1,0 +1,6 @@
+{
+  "name": "OrgTrack",
+  "description": "Responsive Web-Based Barcode Attendance Monitoring System",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}
