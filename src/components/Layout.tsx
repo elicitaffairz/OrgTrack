@@ -154,12 +154,12 @@ export function Layout() {
                 All rights reserved.
               </p>
               <p className="text-[10px] text-slate-400">
-                Developed by Eliza Marie Abing
+                Eliza Marie Abing | BSIT
               </p>
             </div>
             <div className="flex items-center gap-4">
               <a
-                href="https://github.com/elizamarieabing10"
+                href="https://github.com/elicitaffairz"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-400 hover:text-primary transition-colors p-2 hover:bg-slate-50 rounded-full"
@@ -167,7 +167,7 @@ export function Layout() {
                 <Github className="w-5 h-5" />
               </a>
               <a
-                href="https://linkedin.com/in/elizamarieabing"
+                href="hhttps://www.linkedin.com/in/eliza-abing-272b0b244/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-400 hover:text-primary transition-colors p-2 hover:bg-slate-50 rounded-full"
