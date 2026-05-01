@@ -6,15 +6,15 @@ import { toast } from "sonner";
 import { Logo } from "../components/Logo";
 
 const features = [
-  { icon: FileUp,   label: "Import", desc: "Upload your master list"    },
-  { icon: QrCode,   label: "Scan",   desc: "Rapid QR attendance"        },
-  { icon: FileDown, label: "Export", desc: "Download reports instantly"  },
+  { icon: FileUp, label: "Import", desc: "Upload your master list" },
+  { icon: QrCode, label: "Scan", desc: "Rapid QR attendance" },
+  { icon: FileDown, label: "Export", desc: "Download reports instantly" },
 ];
 
 const stats = [
-  { value: "Fast",      label: "QR scanning"    },
-  { value: "One-click", label: "CSV export"     },
-  { value: "Zero",      label: "paper needed"   },
+  { value: "Lightning-fast", label: "scans" },
+  { value: "Instant", label: "exports" },
+  { value: "Zero", label: "paperwork" },
 ];
 
 export function Landing() {
@@ -93,8 +93,9 @@ export function Landing() {
                              font-medium text-neutral/80
                              max-w-sm sm:max-w-md lg:max-w-xs xl:max-w-sm leading-relaxed"
                 >
-                  Eliminate bottlenecks. Import master lists, rapidly scan
-                  students via QR, and export detailed reports in seconds.
+                  From list to report in seconds. 
+                  <br />
+                  All data stays on your device with local storage.
                 </p>
               </div>
 
