@@ -351,10 +351,12 @@ export function Scan() {
             >
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 autoFocus
                 placeholder="Scan or enter ID number"
                 value={barcodeInput}
-                onChange={(e) => setBarcodeInput(e.target.value)}
+                onChange={(e) => setBarcodeInput(e.target.value.replace(/\D/g, ""))}
                 className="w-full bg-white border-2 border-gray-200 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 placeholder:text-gray-300 placeholder:text-sm sm:placeholder:text-base focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-base sm:text-lg font-mono font-bold text-center shadow-inner"
               />
             </form>
@@ -508,8 +510,10 @@ export function Scan() {
                   <input
                     id="studentId"
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={manualId}
-                    onChange={(e) => setManualId(e.target.value)}
+                    onChange={(e) => setManualId(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter ID number"
                     className="w-full bg-white border border-gray-200/80 rounded-2xl px-4 py-3.5 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all font-mono text-base shadow-[0_2px_8px_rgba(0,0,0,0.02)] min-h-[44px] relative z-10"
                     autoFocus
