@@ -147,7 +147,7 @@ export function Layout() {
             <Outlet />
           </div>
 
-          <footer className="shrink-0 w-full bg-white border-t border-slate-200 py-6 px-4 md:px-8 pb-[calc(1.5rem+80px)] md:pb-6 mt-auto flex flex-col md:flex-row items-center justify-between gap-4 z-10">
+          <footer className="shrink-0 w-full bg-white border-t border-slate-200 py-6 px-4 md:px-8 pb-[calc(1.5rem+60px)] md:pb-6 mt-auto flex flex-col md:flex-row items-center justify-between gap-4 z-10">
             <div className="flex flex-col items-center md:items-start gap-1">
               <p className="text-xs text-slate-500 font-medium">
                 &copy; {new Date().getFullYear()} OrgTrack.

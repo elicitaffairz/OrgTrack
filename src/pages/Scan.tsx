@@ -348,17 +348,11 @@ export function Scan() {
               <input
                 type="text"
                 autoFocus
-                placeholder="Scan Barcode here..."
+                placeholder="Scan or enter ID number"
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-lg font-mono font-bold text-center shadow-inner"
               />
-              <button
-                type="submit"
-                className="absolute right-2 top-2 bottom-2 bg-secondary text-white px-4 rounded-xl font-bold text-xs uppercase hover:bg-[#0044cc] transition-colors"
-              >
-                Scan
-              </button>
             </form>
           </div>
         )}
@@ -504,7 +498,7 @@ export function Scan() {
                   htmlFor="studentId"
                   className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1"
                 >
-                  ID Number *
+                  ID Number <span className="font-bold text-primary">*</span>
                 </label>
                 <div className="relative">
                   <input

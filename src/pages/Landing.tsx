@@ -1,9 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, FileUp, QrCode, FileDown, Github, Linkedin } from "lucide-react";
 import { useAttendanceStore } from "../store";
 import { toast } from "sonner";
 import { Logo } from "../components/Logo";
+
+const features = [
+  { icon: FileUp,   label: "Import", desc: "Upload your master list"    },
+  { icon: QrCode,   label: "Scan",   desc: "Rapid QR attendance"        },
+  { icon: FileDown, label: "Export", desc: "Download reports instantly"  },
+];
+
+const stats = [
+  { value: "Fast",      label: "QR scanning"    },
+  { value: "One-click", label: "CSV export"     },
+  { value: "Zero",      label: "paper needed"   },
+];
 
 export function Landing() {
   const navigate = useNavigate();
@@ -20,94 +32,216 @@ export function Landing() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-bg-light font-sans px-4 sm:px-6 w-full mx-auto relative overflow-hidden">
-      {/* Subtle Data Grid Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+    <div className="flex flex-col min-h-[100dvh] bg-bg-light font-sans relative overflow-hidden">
+
+      {/* Background decorations */}
+      <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.035]"
           style={{
             backgroundImage:
               "linear-gradient(var(--color-secondary) 1px, transparent 1px), linear-gradient(90deg, var(--color-secondary) 1px, transparent 1px)",
             backgroundSize: "48px 48px",
           }}
         />
-        {/* Soft radial gradients for glassmorphism backdrops */}
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-secondary/15 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-white/50 rounded-full blur-[100px]" />
+        <div className="absolute top-[-15%] left-[-10%] w-[55%] h-[60%] bg-secondary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[55%] bg-primary/10 rounded-full blur-[100px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-white/60 rounded-full blur-[80px]" />
       </div>
 
-      <div className="w-full max-w-3xl relative z-10 flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
-        {/* Brand Logo */}
-        <div className="mb-8 flex items-center justify-center w-full">
-          <Logo className="w-20 h-20 drop-shadow-md" />
-          <div className="flex flex-col items-start justify-center pt-1">
-            <span className="text-[2.3rem] font-black text-secondary tracking-[-0.03em] leading-[0.9]">
-              OrgTrack
-            </span>
-            <span className="text-[.9rem] font-medium text-secondary tracking-tight mt-2.5 leading-none">
-              Attendance Monitoring
-            </span>
-          </div>
-        </div>
+      {/* Main content */}
+      <main className="flex-1 flex items-center justify-center px-5 sm:px-8 lg:px-12 xl:px-16 py-10 sm:py-12 relative z-10">
+        <div className="w-full max-w-5xl xl:max-w-6xl mx-auto">
 
-        {/* Hero Typography */}
-        <div className="text-center space-y-6 mb-12 flex flex-col items-center">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 tracking-tighter leading-[1.1]">
-            Seamless <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-blue-600 to-primary">
-              Attendance
-            </span>{" "}
-            Tracking
-          </h1>
-          <p className="text-base sm:text-lg font-medium text-neutral max-w-xl mx-auto leading-relaxed">
-            Eliminate bottlenecks. Import master lists, rapidly scan your
-            students via QR, and export detailed reports in seconds.
-          </p>
-        </div>
+          {/* Two-column grid: left = branding/headline, right = card */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-12 xl:gap-16">
 
-        {/* Action Card with Deep Glassmorphism */}
-        <div className="bg-white/40 backdrop-blur-2xl p-2 sm:p-2.5 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_40px_-15px_rgba(0,51,160,0.1)] border border-white/60 w-full max-w-md mx-auto transition-all hover:bg-white/50 hover:shadow-[0_20px_40px_-10px_rgba(0,51,160,0.15)] hover:border-primary/80">
-          <div className="bg-white/70 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 flex flex-col items-center gap-6 shadow-sm border border-white/50">
-            <div className="w-full space-y-2">
-              <label
-                htmlFor="eventName"
-                className="block text-xs font-bold text-secondary uppercase tracking-wider ml-1"
-              >
-                Event Name
-              </label>
-              <div className="relative w-full group">
-                <input
-                  id="eventName"
-                  type="text"
-                  placeholder="e.g. IT Gen Assembly 2024"
-                  value={eventInput}
-                  onChange={(e) => setEventInput(e.target.value)}
-                  className="w-full bg-white/90 border border-gray-200/80 rounded-2xl px-5 py-4 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-base font-semibold text-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative z-10"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleStart();
-                    }
-                  }}
-                />
+            {/* LEFT — Branding, headline, stats */}
+            <div
+              className="flex-1 flex flex-col gap-6 sm:gap-7
+                         animate-in fade-in slide-in-from-left-6 duration-700 ease-out"
+            >
+              {/* Logo */}
+              <div className="flex items-center gap-3">
+                <Logo className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-sm flex-shrink-0" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[1.6rem] sm:text-[1.8rem] font-black text-secondary tracking-[-0.04em] leading-none">
+                    OrgTrack
+                  </span>
+                  <span className="text-[0.7rem] sm:text-[0.75rem] font-semibold text-secondary/70 tracking-wide mt-1.5">
+                    Attendance Monitoring
+                  </span>
+                </div>
+              </div>
+
+              {/* Headline */}
+              <div className="space-y-3">
+                <h1
+                  className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem]
+                             lg:text-[3rem] xl:text-[3.8rem]
+                             font-black text-gray-900 tracking-[-0.04em] leading-[1.05]"
+                >
+                  Seamless{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-blue-600 to-primary">
+                    Attendance
+                  </span>
+                  <br />
+                  Tracking.
+                </h1>
+                <p
+                  className="text-[0.9rem] sm:text-[0.95rem] lg:text-[0.88rem] xl:text-[0.95rem]
+                             font-medium text-neutral/80
+                             max-w-sm sm:max-w-md lg:max-w-xs xl:max-w-sm leading-relaxed"
+                >
+                  Eliminate bottlenecks. Import master lists, rapidly scan
+                  students via QR, and export detailed reports in seconds.
+                </p>
+              </div>
+
+              {/* Stat row */}
+              <div className="hidden sm:flex items-center gap-6 pt-1">
+                {stats.map(({ value, label }, i) => (
+                  <div key={label} className="flex items-center gap-6">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm font-black text-secondary tracking-tight">{value}</span>
+                      <span className="text-[0.68rem] text-neutral/60 font-medium">{label}</span>
+                    </div>
+                    {i < stats.length - 1 && (
+                      <div className="w-px h-8 bg-secondary/15" />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
-            <button
-              onClick={handleStart}
-              className="relative overflow-hidden group bg-gradient-to-r from-secondary to-[#0044cc] hover:from-secondary hover:to-[#0055ff] text-white px-8 py-4 sm:py-4.5 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-[0_8px_20px_rgba(0,51,160,0.25)] hover:shadow-[0_12px_25px_rgba(0,51,160,0.35)] w-full min-h-[56px]"
+            {/* RIGHT — Action card */}
+            <div
+              className="w-full lg:w-[380px] xl:w-[420px] flex-shrink-0
+                         animate-in fade-in slide-in-from-right-6 duration-700 ease-out delay-150"
             >
-              <span className="relative z-10 font-bold text-[15px] tracking-wide">
-                Start New Session
-              </span>
-              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <p className="text-[11px] font-medium text-neutral text-center opacity-80 mt-1">
-              Press Enter to continue
-            </p>
+              <div
+                className="bg-white border border-gray-100 rounded-2xl sm:rounded-3xl p-6 sm:p-8
+                           shadow-[0_16px_48px_-12px_rgba(0,51,160,0.12)]
+                           flex flex-col gap-6"
+              >
+                {/* Card header */}
+                <div className="space-y-1">
+                  <h2 className="text-base sm:text-lg font-black text-gray-900 tracking-tight">
+                    Start a new session
+                  </h2>
+                  <p className="text-xs sm:text-[0.8rem] text-neutral/60 font-medium">
+                    Name your event to get started
+                  </p>
+                </div>
+
+                {/* Input */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="eventName"
+                    className="block text-[0.7rem] font-bold text-secondary uppercase tracking-widest"
+                  >
+                    Event Name
+                  </label>
+                  <input
+                    id="eventName"
+                    type="text"
+                    placeholder="e.g. IT Gen Assembly 2025"
+                    value={eventInput}
+                    onChange={(e) => setEventInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleStart(); }}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5
+                               placeholder:text-gray-300 placeholder:font-normal
+                               focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary
+                               transition-all text-sm font-semibold text-gray-800"
+                  />
+                </div>
+
+                {/* CTA Button */}
+                <button
+                  onClick={handleStart}
+                  className="group relative overflow-hidden
+                             bg-gradient-to-r from-secondary to-[#0044cc]
+                             hover:from-[#002a8a] hover:to-[#0055ff]
+                             text-white rounded-xl
+                             flex items-center justify-center gap-2.5
+                             transition-all active:scale-[0.98]
+                             shadow-[0_6px_20px_rgba(0,51,160,0.28)]
+                             hover:shadow-[0_10px_28px_rgba(0,51,160,0.38)]
+                             py-3.5 sm:py-4 w-full"
+                >
+                  <span className="font-bold text-sm tracking-wide relative z-10">
+                    Start New Session
+                  </span>
+                  <ArrowRight
+                    className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform duration-200"
+                  />
+                </button>
+
+                {/* Keyboard hint */}
+                <p className="text-[0.68rem] font-medium text-neutral/50 text-center -mt-2">
+                  Press{" "}
+                  <kbd className="bg-gray-100 border border-gray-200 text-gray-500 text-[0.65rem] px-1.5 py-0.5 rounded font-mono">
+                    Enter
+                  </kbd>{" "}
+                  to continue
+                </p>
+
+                {/* Feature icon row inside card */}
+                <div className="border-t border-gray-100 pt-4 grid grid-cols-3 gap-2">
+                  {features.map(({ icon: Icon, label, desc }) => (
+                    <div key={label} className="flex flex-col items-center gap-1.5 text-center">
+                      <div className="w-8 h-8 rounded-lg bg-secondary/8 flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-secondary" strokeWidth={2} />
+                      </div>
+                      <span className="text-[0.65rem] font-bold text-secondary">{label}</span>
+                      <span className="text-[0.6rem] text-neutral/50 font-medium leading-tight hidden sm:block">
+                        {desc}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer
+        className="shrink-0 w-full bg-white border-t border-slate-200 relative z-10
+                   py-4 px-5 sm:px-30
+                   pb-[calc(1rem+5px)] md:pb-4
+                   flex flex-col md:flex-row items-center justify-between gap-3"
+      >
+        <div className="flex flex-col items-center md:items-start gap-0.5">
+          <p className="text-xs text-slate-500 font-medium">
+            &copy; {new Date().getFullYear()} OrgTrack. All rights reserved.
+          </p>
+          <p className="text-[0.65rem] text-slate-400">
+            Eliza Marie Abing | BSIT
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <a
+            href="https://github.com/elicitaffairz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-400 hover:text-secondary transition-colors p-2 hover:bg-slate-50 rounded-full"
+          >
+            <Github className="w-4 h-4 sm:w-5 sm:h-5" />
+          </a>
+          <a
+            href="https://www.linkedin.com/in/eliza-abing-272b0b244/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-400 hover:text-secondary transition-colors p-2 hover:bg-slate-50 rounded-full"
+          >
+            <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
+          </a>
+        </div>
+      </footer>
+
     </div>
   );
 }
