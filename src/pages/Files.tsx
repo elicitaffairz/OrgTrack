@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import Papa from "papaparse";
 import { read, utils, writeFile } from "xlsx";
-import { UploadCloud, FileDown, Trash2, CheckCircle2 } from "lucide-react";
+import { UploadCloud, FileDown, Trash2, CheckCircle2, ChevronDown } from "lucide-react";
 import { useAttendanceStore, Student, ScanRecord } from "../store";
 import { toast } from "sonner";
 
@@ -35,7 +35,6 @@ export function Files() {
 
         const parsedList: Student[] = data
           .map((row) => {
-            // Find keys ignoring case and spaces to match variations like "ID NUMBER"
             const keys = Object.keys(row);
             const getVal = (possibleNames: string[]) => {
               const matchedKey = keys.find((k) =>
@@ -81,7 +80,7 @@ export function Files() {
   const exportData = (yearFilter: string) => {
     let filteredScans = scans;
     if (yearFilter !== "All Reports") {
-      const yearStr = yearFilter.split("-")[0]; // "1st", "2nd"
+      const yearStr = yearFilter.split("-")[0];
       filteredScans = scans.filter((s) => s.yearLevel.includes(yearStr));
     }
 
@@ -116,7 +115,6 @@ export function Files() {
         : `${yearFilter}_${dateStr}.xlsx`;
 
     writeFile(wb, filename);
-
     toast.success(`Exported ${filename}`);
   };
 
@@ -270,7 +268,6 @@ export function Files() {
                     const wb = utils.book_new();
                     utils.book_append_sheet(wb, ws, "Template");
                     writeFile(wb, "Masterlist-Template.xlsx");
-
                     toast.success(
                       "Template downloaded. Fill it out and import it.",
                     );
@@ -313,17 +310,21 @@ export function Files() {
             </h2>
 
             <div className="space-y-4">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="w-full bg-white border border-gray-200/80 text-gray-700 text-sm font-bold rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer min-h-[44px]"
-              >
-                <option value="All Reports">All Reports</option>
-                <option value="1st Year">1st Year Only</option>
-                <option value="2nd Year">2nd Year Only</option>
-                <option value="3rd Year">3rd Year Only</option>
-                <option value="4th Year">4th Year Only</option>
-              </select>
+              {/* FIXED: wrapped in relative div with custom ChevronDown */}
+              <div className="relative">
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="appearance-none w-full bg-white border border-gray-200/80 text-gray-700 text-sm font-bold rounded-2xl pl-5 pr-10 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer min-h-[44px]"
+                >
+                  <option value="All Reports">All Reports</option>
+                  <option value="1st Year">1st Year Only</option>
+                  <option value="2nd Year">2nd Year Only</option>
+                  <option value="3rd Year">3rd Year Only</option>
+                  <option value="4th Year">4th Year Only</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
 
               <div className="space-y-2 mt-4">
                 {["1st-Year", "2nd-Year", "3rd-Year", "4th-Year"].map(

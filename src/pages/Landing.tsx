@@ -177,15 +177,6 @@ export function Landing() {
                   />
                 </button>
 
-                {/* Keyboard hint */}
-                <p className="text-[0.68rem] font-medium text-neutral/50 text-center -mt-2">
-                  Press{" "}
-                  <kbd className="bg-gray-100 border border-gray-200 text-gray-500 text-[0.65rem] px-1.5 py-0.5 rounded font-mono">
-                    Enter
-                  </kbd>{" "}
-                  to continue
-                </p>
-
                 {/* Feature icon row inside card */}
                 <div className="border-t border-gray-100 pt-4 grid grid-cols-3 gap-2">
                   {features.map(({ icon: Icon, label, desc }) => (

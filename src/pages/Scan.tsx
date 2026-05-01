@@ -40,7 +40,7 @@ export function Scan() {
       .then((devices) => {
         if (devices && devices.length) {
           setCameras(devices);
-          
+
           // Try to find the back/environment camera first
           const environmentCamera = devices.find(
             (device) =>
@@ -48,7 +48,7 @@ export function Scan() {
               device.label.toLowerCase().includes("environment") ||
               device.label.toLowerCase().includes("rear")
           );
-          
+
           if (environmentCamera) {
             setSelectedCameraId(environmentCamera.id);
           } else {
@@ -125,7 +125,7 @@ export function Scan() {
         try {
           html5QrCode.clear();
         } catch (e) {
-           console.error("Error clearing scanner", e);
+          console.error("Error clearing scanner", e);
         }
       }
     };
@@ -242,16 +242,20 @@ export function Scan() {
                 Select the year level for new or unlisted students
               </p>
             </div>
-            <select
-              value={manualYear}
-              onChange={(e) => setManualYear(e.target.value)}
-              className="bg-white border border-gray-200/80 text-gray-800 text-sm font-bold rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer w-full sm:w-auto min-h-[44px]"
-            >
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
-            </select>
+            {/* FIXED: wrapped in relative div with custom ChevronDown */}
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={manualYear}
+                onChange={(e) => setManualYear(e.target.value)}
+                className="appearance-none bg-white border border-gray-200/80 text-gray-800 text-sm font-bold rounded-2xl pl-4 pr-10 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer w-full min-h-[44px]"
+              >
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
         </div>
 
@@ -266,7 +270,7 @@ export function Scan() {
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
             )}
           >
-            Camera Scanner
+            Camera 
           </button>
           <button
             onClick={() => setScanMode("barcode")}
@@ -277,7 +281,7 @@ export function Scan() {
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
             )}
           >
-            Barcode Scanner
+            Barcode 
           </button>
         </div>
 
@@ -351,7 +355,7 @@ export function Scan() {
                 placeholder="Scan or enter ID number"
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
-                className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-lg font-mono font-bold text-center shadow-inner"
+                className="w-full bg-white border-2 border-gray-200 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 placeholder:text-gray-300 placeholder:text-sm sm:placeholder:text-base focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-base sm:text-lg font-mono font-bold text-center shadow-inner"
               />
             </form>
           </div>
@@ -560,18 +564,20 @@ export function Scan() {
                   >
                     Year Level
                   </label>
+                  {/* FIXED: wrapped in relative div with custom ChevronDown */}
                   <div className="relative">
                     <select
                       id="studentYear"
                       value={manualYear}
                       onChange={(e) => setManualYear(e.target.value)}
-                      className="w-full bg-white border border-gray-200/80 rounded-2xl px-4 py-3.5 font-bold focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-base shadow-[0_2px_8px_rgba(0,0,0,0.02)] min-h-[44px] relative z-10 cursor-pointer"
+                      className="appearance-none w-full bg-white border border-gray-200/80 rounded-2xl pl-4 pr-10 py-3.5 font-bold focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-base shadow-[0_2px_8px_rgba(0,0,0,0.02)] min-h-[44px] cursor-pointer"
                     >
                       <option value="1st Year">1st Year</option>
                       <option value="2nd Year">2nd Year</option>
                       <option value="3rd Year">3rd Year</option>
                       <option value="4th Year">4th Year</option>
                     </select>
+                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
               </div>

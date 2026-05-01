@@ -27,12 +27,11 @@ export function Dashboard() {
     const totalStudents = masterlist.length;
     const totalAttendees = scans.length;
 
-    // Group attendance by year level
     const initialChartData = [
-      { name: "1st Year", count: 0, total: 0, fill: "#3b82f6" }, // blue
-      { name: "2nd Year", count: 0, total: 0, fill: "#22c55e" }, // green
-      { name: "3rd Year", count: 0, total: 0, fill: "#f97316" }, // orange
-      { name: "4th Year", count: 0, total: 0, fill: "#a855f7" }, // purple
+      { name: "1st Year", count: 0, total: 0, fill: "#3b82f6" },
+      { name: "2nd Year", count: 0, total: 0, fill: "#22c55e" },
+      { name: "3rd Year", count: 0, total: 0, fill: "#f97316" },
+      { name: "4th Year", count: 0, total: 0, fill: "#a855f7" },
     ];
 
     const chartData = initialChartData.map((level) => {
@@ -54,7 +53,6 @@ export function Dashboard() {
     };
   }, [masterlist, scans, duplicateAttempts]);
 
-  // Using custom horizontal bar chart with native tailwind elements for a cleaner look than recharts for simple horizontal bars
   return (
     <div className="flex flex-col min-h-full bg-bg-light">
       <header className="h-16 bg-primary border-b border-primary-hover flex items-center justify-between px-6 sm:px-8 sticky top-0 z-10 w-full shadow-md">
@@ -81,7 +79,7 @@ export function Dashboard() {
       </header>
 
       <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-6 mx-auto w-full max-w-7xl">
-        {/* Left Column containing Charts in high density, but we'll adapt to existing components */}
+        {/* Left Column */}
         <div className="md:col-span-8 flex flex-col gap-6">
           {/* Chart Section */}
           <div className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-white flex-1 transition-all hover:bg-white/90">
@@ -122,44 +120,40 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Scan Status Cards */}
+          {/* Scan Status Cards — FIXED: stacked on mobile, row on sm+ */}
           <div className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,51,160,0.04)] border border-white">
             <h2 className="text-xs font-bold text-gray-600 tracking-widest mb-4 uppercase">
               Scan Status
             </h2>
-            <div className="flex gap-4">
-              <div className="flex-1 bg-green-50/70 border border-green-100 rounded-2xl p-5 self-stretch flex flex-col justify-between transition-all hover:bg-green-50 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
+            <div className="flex gap-3 sm:gap-4">
+              <div className="flex-1 bg-green-50/70 border border-green-100 rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between transition-all hover:bg-green-50 shadow-sm">
+                <div className="flex items-center gap-1.5 mb-2">
                   <CheckCircle2
-                    className="w-4 h-4 text-green-600 mb-[2px]"
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 flex-shrink-0"
                     strokeWidth={2.5}
                   />
-                  <span className="text-[11px] font-bold text-green-700 tracking-widest">
+                  <span className="text-[9px] sm:text-[11px] font-bold text-green-700 tracking-wide sm:tracking-widest leading-tight">
                     SUCCESSFUL SCANS
                   </span>
                 </div>
-                <div>
-                  <p className="text-2xl font-black text-green-800 leading-none">
-                    {stats.totalAttendees}
-                  </p>
-                </div>
+                <p className="text-xl sm:text-2xl font-black text-green-800 leading-none">
+                  {stats.totalAttendees}
+                </p>
               </div>
 
-              <div className="flex-1 bg-orange-50/70 border border-orange-200 rounded-2xl p-5 self-stretch flex flex-col justify-between transition-all hover:bg-orange-50 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 bg-orange-50/70 border border-orange-200 rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between transition-all hover:bg-orange-50 shadow-sm">
+                <div className="flex items-center gap-1.5 mb-2">
                   <AlertTriangle
-                    className="w-4 h-4 text-orange-500 mb-[2px]"
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 flex-shrink-0"
                     strokeWidth={2.5}
                   />
-                  <span className="text-[11px] font-bold text-orange-700 tracking-widest uppercase">
+                  <span className="text-[9px] sm:text-[11px] font-bold text-orange-700 tracking-wide sm:tracking-widest leading-tight uppercase">
                     Duplicate Detected
                   </span>
                 </div>
-                <div>
-                  <p className="text-xl font-black text-orange-800 leading-none">
-                    {stats.duplicateAttempts}
-                  </p>
-                </div>
+                <p className="text-lg sm:text-xl font-black text-orange-800 leading-none">
+                  {stats.duplicateAttempts}
+                </p>
               </div>
             </div>
           </div>
@@ -181,10 +175,8 @@ export function Dashboard() {
           </div>
 
           <div className="bg-primary p-6 rounded-[2rem] shadow-[0_12px_30px_rgba(200,16,46,0.25)] text-white relative overflow-hidden group">
-            {/* Background geometric accents */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl transition-transform duration-700 group-hover:scale-125" />
             <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-black/20 rounded-full blur-xl" />
-
             <div className="relative z-10 flex justify-between items-end">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">
