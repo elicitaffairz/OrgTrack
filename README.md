@@ -1,6 +1,6 @@
 # OrgTrack
 
-**OrgTrack** is a responsive, web-based attendance monitoring system tailored for event organizers, faculty, and student organization officers. It streamlines the recording and management of event attendees through rapid QR and barcode scanning, transitioning away from high-friction, error-prone manual administrative tasks into a seamless digital experience.
+**OrgTrack** is a responsive, web-based attendance monitoring system tailored for event organizers, faculty, and student organization officers. It streamlines the recording and management of event attendees through rapid QR and barcode scanning, transitioning away from high-friction, error-prone manual administrative tasks into a seamless digital experience. No login required and it saves data with local storage. Works on any device with a browser. Try it now!
 
 ## ✨ Features
 
