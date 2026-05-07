@@ -408,21 +408,19 @@ export function Files() {
 
           {/* Export Column */}
           <div className="space-y-3">
-            <div className="flex items-start gap-3 p-4 rounded-[1.5rem] bg-secondary/10 border border-secondary/20 shadow-[0_2px_10px_rgba(0,51,160,0.06)] animate-fade-in-down">
-              <div className="bg-secondary/20 p-2 rounded-xl">
-                <FileDown className="w-4 h-4 text-secondary" />
+            <div className="flex items-start gap-3 p-4 rounded-[1.5rem] bg-[#EBF3FF] border border-[#D1E3FF] shadow-sm animate-fade-in-down">
+              <div className="bg-[#D1E3FF] p-2 rounded-xl">
+                <FileDown className="w-4 h-4 text-[#4B8CFF]" />
               </div>
               <div className="flex-1">
                 <p className="text-[#0033A0] font-bold text-medium leading-tight mb-2">
                   Heads Up!
                 </p>
                 <p className="text-xs text-[#0033A0]/80 font-medium leading-relaxed max-w-[250px]">
-                  Export attendance reports here. Select a year level, then click
-                  Export.
+                  Export attendance reports here. Select a year level, then click Export.
                 </p>
               </div>
             </div>
-
             {/* Export Section */}
             <section className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,51,160,0.03)] border border-white animate-fade-in-up">
               <h2 className="text-xs font-bold text-gray-600 tracking-widest mb-4 uppercase">
@@ -430,77 +428,77 @@ export function Files() {
               </h2>
 
               <div className="space-y-4">
-              {/* FIXED: wrapped in relative div with custom ChevronDown */}
-              <div className="relative">
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="appearance-none w-full bg-white border border-gray-200/80 text-gray-700 text-sm font-bold rounded-2xl pl-5 pr-10 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer min-h-[44px]"
-                >
-                  <option value="All Reports">All Reports</option>
-                  <option value="1st Year">1st Year Only</option>
-                  <option value="2nd Year">2nd Year Only</option>
-                  <option value="3rd Year">3rd Year Only</option>
-                  <option value="4th Year">4th Year Only</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-
-              <div className="space-y-2 mt-4">
-                {["1st-Year", "2nd-Year", "3rd-Year", "4th-Year"].map(
-                  (yearMatch, idx) => {
-                    if (
-                      filter !== "All Reports" &&
-                      !filter.includes(yearMatch.split("-")[0])
-                    )
-                      return null;
-                    return (
-                      <div
-                        key={yearMatch}
-                        className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors animate-fade-in-up"
-                        style={{ animationDelay: `${idx * 40}ms` }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="bg-green-100 p-1.5 rounded-lg">
-                            <FileDown className="w-4 h-4 text-green-600" />
-                          </div>
-                          <span className="text-xs font-bold text-gray-700">
-                            {yearMatch.replace("-", " ")} Report
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => prepareExport(yearMatch)}
-                          className="bg-gradient-to-r from-secondary to-[#0044cc] hover:from-secondary hover:to-[#0055ff] text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-all shadow-[0_4px_12px_rgba(0,51,160,0.2)] hover:shadow-[0_6px_16px_rgba(0,51,160,0.3)]"
-                        >
-                          Export
-                        </button>
-                      </div>
-                    );
-                  },
-                )}
-
-                {filter === "All Reports" && (
-                  <div
-                    className="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-100 mt-4 animate-fade-in-up"
-                    style={{ animationDelay: "200ms" }}
+                {/* FIXED: wrapped in relative div with custom ChevronDown */}
+                <div className="relative">
+                  <select
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="appearance-none w-full bg-white border border-gray-200/80 text-gray-700 text-sm font-bold rounded-2xl pl-5 pr-10 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer min-h-[44px]"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-gray-200 p-1.5 rounded-lg">
-                        <FileDown className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <span className="text-xs font-bold text-gray-800">
-                        All Attendance Report
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => prepareExport("All Reports")}
-                      className="bg-gray-800 hover:bg-black text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-all shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.3)] min-h-[36px]"
+                    <option value="All Reports">All Reports</option>
+                    <option value="1st Year">1st Year Only</option>
+                    <option value="2nd Year">2nd Year Only</option>
+                    <option value="3rd Year">3rd Year Only</option>
+                    <option value="4th Year">4th Year Only</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  {["1st-Year", "2nd-Year", "3rd-Year", "4th-Year"].map(
+                    (yearMatch, idx) => {
+                      if (
+                        filter !== "All Reports" &&
+                        !filter.includes(yearMatch.split("-")[0])
+                      )
+                        return null;
+                      return (
+                        <div
+                          key={yearMatch}
+                          className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors animate-fade-in-up"
+                          style={{ animationDelay: `${idx * 40}ms` }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="bg-green-100 p-1.5 rounded-lg">
+                              <FileDown className="w-4 h-4 text-green-600" />
+                            </div>
+                            <span className="text-xs font-bold text-gray-700">
+                              {yearMatch.replace("-", " ")} Report
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => prepareExport(yearMatch)}
+                            className="bg-gradient-to-r from-secondary to-[#0044cc] hover:from-secondary hover:to-[#0055ff] text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-all shadow-[0_4px_12px_rgba(0,51,160,0.2)] hover:shadow-[0_6px_16px_rgba(0,51,160,0.3)]"
+                          >
+                            Export
+                          </button>
+                        </div>
+                      );
+                    },
+                  )}
+
+                  {filter === "All Reports" && (
+                    <div
+                      className="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-100 mt-4 animate-fade-in-up"
+                      style={{ animationDelay: "200ms" }}
                     >
-                      Export All
-                    </button>
-                  </div>
-                )}
-              </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-gray-200 p-1.5 rounded-lg">
+                          <FileDown className="w-4 h-4 text-gray-600" />
+                        </div>
+                        <span className="text-xs font-bold text-gray-800">
+                          All Attendance Report
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => prepareExport("All Reports")}
+                        className="bg-gray-800 hover:bg-black text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-all shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.3)] min-h-[36px]"
+                      >
+                        Export All
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           </div>
