@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useAttendanceStore } from "../store";
 import { toast } from "sonner";
 import { cn } from "../components/Layout";
+import { yearLevelToNumber } from "../utils/yearLevel";
 
 export function Scan() {
   const navigate = useNavigate();
@@ -200,23 +201,8 @@ export function Scan() {
     setBarcodeInput(""); // reset for next scan
   };
 
-  const getYearLevelNumber = (yearLevel: string) => {
-    const raw = String(yearLevel ?? "").trim();
-    if (!raw) return "";
-
-    const lowered = raw.toLowerCase();
-    if (/^[1-4]$/.test(lowered)) return lowered;
-    if (lowered.includes("1st") || lowered.includes("first")) return "1";
-    if (lowered.includes("2nd") || lowered.includes("second")) return "2";
-    if (lowered.includes("3rd") || lowered.includes("third")) return "3";
-    if (lowered.includes("4th") || lowered.includes("fourth")) return "4";
-
-    const digit = lowered.match(/[1-4]/)?.[0];
-    return digit ?? "";
-  };
-
   const getYearBadgeColor = (yearLevel: string) => {
-    const year = getYearLevelNumber(yearLevel);
+    const year = yearLevelToNumber(yearLevel);
     if (year === "1") return "bg-blue-100 text-blue-700";
     if (year === "2") return "bg-green-100 text-green-700";
     if (year === "3") return "bg-orange-100 text-orange-700";
@@ -462,7 +448,7 @@ export function Scan() {
                 </div>
 
                 {filteredScans.slice(0, 4).map((scan, idx) => {
-                  const yearNumber = getYearLevelNumber(scan.yearLevel);
+                  const yearNumber = yearLevelToNumber(scan.yearLevel);
                   return (
                     <div
                       key={`${scan.id}-${idx}`}

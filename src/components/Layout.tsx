@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   ScanLine,
@@ -16,7 +16,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function Layout() {
-  const location = useLocation();
   const navigate = useNavigate();
   const {
     eventName,
@@ -167,7 +166,7 @@ export function Layout() {
                 <Github className="w-5 h-5" />
               </a>
               <a
-                href="hhttps://www.linkedin.com/in/eliza-abing-272b0b244/"
+                href="https://www.linkedin.com/in/eliza-abing-272b0b244/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-400 hover:text-primary transition-colors p-2 hover:bg-slate-50 rounded-full"

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import Papa from "papaparse";
 import { read, utils, writeFile } from "xlsx";
 import { UploadCloud, FileDown, Trash2, CheckCircle2, ChevronDown } from "lucide-react";
-import { useAttendanceStore, Student, ScanRecord } from "../store";
+import { useAttendanceStore, Student } from "../store";
 import { toast } from "sonner";
 
 export function Files() {
@@ -26,9 +26,88 @@ export function Files() {
     recordCount: number;
   } | null>(null);
 
+  const parseRowsToStudents = (rows: any[]): Student[] => {
+    return rows
+      .map((row) => {
+        const keys = Object.keys(row ?? {});
+        const getVal = (possibleNames: string[]) => {
+          const matchedKey = keys.find((k) =>
+            possibleNames.some(
+              (name) =>
+                k.replace(/\s+/g, "").toLowerCase() ===
+                name.replace(/\s+/g, "").toLowerCase(),
+            ),
+          );
+          return matchedKey ? row[matchedKey] : "";
+        };
+
+        const student: Student = {
+          id: String(
+            getVal([
+              "Student ID",
+              "ID",
+              "ID NUMBER",
+              "ID Number",
+              "Student Number",
+            ]),
+          ).trim(),
+          name: String(getVal(["Name", "Student Name", "Full Name"]))
+            .trim()
+            .replace(/\s+/g, " "),
+          yearLevel: String(getVal(["Year Level", "Year", "Level"]) || "Unknown").trim(),
+          course: String(getVal(["Course", "Program", "Degree"]) || "Unknown").trim(),
+        };
+
+        return student;
+      })
+      .filter((s) => s.id && s.name);
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const isCsv = file.name.toLowerCase().endsWith(".csv");
+
+    const onParsedStudents = (parsedList: Student[]) => {
+      if (parsedList.length > 0) {
+        importMasterlist(parsedList, file.name);
+        toast.success(
+          `Successfully imported ${parsedList.length} students from ${file.name}`,
+        );
+      } else {
+        toast.error(
+          "No valid student data found in the file. Please check column headers.",
+        );
+      }
+
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    if (isCsv) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: "greedy",
+        complete: (results) => {
+          try {
+            const rows = Array.isArray(results.data) ? results.data : [];
+            onParsedStudents(parseRowsToStudents(rows as any[]));
+          } catch {
+            toast.error(
+              "Error processing the file. Please ensure it's a valid CSV/Excel file.",
+            );
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          }
+        },
+        error: () => {
+          toast.error(
+            "Error processing the file. Please ensure it's a valid CSV/Excel file.",
+          );
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        },
+      });
+      return;
+    }
 
     const fileReader = new FileReader();
     fileReader.onload = (evt) => {
@@ -38,47 +117,15 @@ export function Files() {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = utils.sheet_to_json(ws) as any[];
-
-        const parsedList: Student[] = data
-          .map((row) => {
-            const keys = Object.keys(row);
-            const getVal = (possibleNames: string[]) => {
-              const matchedKey = keys.find((k) =>
-                possibleNames.some((name) =>
-                  k.replace(/\s+/g, "").toLowerCase() === name.replace(/\s+/g, "").toLowerCase()
-                )
-              );
-              return matchedKey ? row[matchedKey] : "";
-            };
-
-            return {
-              id: String(getVal(["Student ID", "ID", "ID NUMBER", "ID Number", "Student Number"])).trim(),
-              name: String(getVal(["Name", "Student Name", "Full Name"])).trim(),
-              yearLevel: String(getVal(["Year Level", "Year", "Level"]) || "Unknown").trim(),
-              course: String(getVal(["Course", "Program", "Degree"]) || "Unknown").trim(),
-            };
-          })
-          .filter((s) => s.id && s.name);
-
-        if (parsedList.length > 0) {
-          importMasterlist(parsedList, file.name);
-          toast.success(
-            `Successfully imported ${parsedList.length} students from ${file.name}`,
-          );
-        } else {
-          toast.error(
-            "No valid student data found in the file. Please check column headers.",
-          );
-        }
+        onParsedStudents(parseRowsToStudents(data));
       } catch (err) {
         toast.error(
           "Error processing the file. Please ensure it's a valid CSV/Excel file.",
         );
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
     fileReader.readAsBinaryString(file);
-
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const hasMasterlist = masterlist.length > 0;
