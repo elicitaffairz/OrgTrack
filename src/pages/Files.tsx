@@ -11,14 +11,20 @@ export function Files() {
     scans,
     importMasterlist,
     clearMasterlist,
-    resetSession,
+    clearScans,
     masterlistFilename,
   } = useAttendanceStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const exportWorkbookRef = useRef<any | null>(null);
   const [filter, setFilter] = useState("All Reports");
 
   const [isRemoveListModalOpen, setIsRemoveListModalOpen] = useState(false);
   const [isClearScansModalOpen, setIsClearScansModalOpen] = useState(false);
+  const [pendingExport, setPendingExport] = useState<{
+    yearFilter: string;
+    filename: string;
+    recordCount: number;
+  } | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,7 +83,7 @@ export function Files() {
 
   const hasMasterlist = masterlist.length > 0;
 
-  const exportData = (yearFilter: string) => {
+  const prepareExport = (yearFilter: string) => {
     let filteredScans = scans;
     if (yearFilter !== "All Reports") {
       const yearStr = yearFilter.split("-")[0];
@@ -114,12 +120,62 @@ export function Files() {
         ? `All-Attendance-Report_${dateStr}.xlsx`
         : `${yearFilter}_${dateStr}.xlsx`;
 
-    writeFile(wb, filename);
-    toast.success(`Exported ${filename}`);
+    exportWorkbookRef.current = wb;
+    setPendingExport({
+      yearFilter,
+      filename,
+      recordCount: exportReady.length,
+    });
+  };
+
+  const downloadPreparedExport = () => {
+    if (!pendingExport || !exportWorkbookRef.current) return;
+    writeFile(exportWorkbookRef.current, pendingExport.filename);
+    toast.success(`Exported ${pendingExport.filename}`);
+    exportWorkbookRef.current = null;
+    setPendingExport(null);
   };
 
   return (
     <div className="flex flex-col min-h-full bg-bg-light relative">
+      {pendingExport && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => {
+              exportWorkbookRef.current = null;
+              setPendingExport(null);
+            }}
+          ></div>
+          <div className="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 w-full max-w-sm relative z-10 shadow-[0_10px_40px_rgba(0,51,160,0.1)] scale-100 animate-in zoom-in-95 duration-200 border border-white">
+            <h3 className="font-bold text-gray-800 text-lg mb-2">
+              Download Report?
+            </h3>
+            <p className="text-gray-500 text-sm mb-5">
+              You’re about to download <span className="font-semibold">{pendingExport.filename}</span>
+              {" "}({pendingExport.recordCount} records).
+            </p>
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={() => {
+                  exportWorkbookRef.current = null;
+                  setPendingExport(null);
+                }}
+                className="flex-1 py-4 px-4 bg-white border border-gray-200/80 text-gray-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={downloadPreparedExport}
+                className="flex-1 py-4 px-4 bg-gradient-to-r from-secondary to-[#0044cc] hover:from-secondary hover:to-[#0055ff] text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-[0_8px_20px_rgba(0,51,160,0.25)] min-h-[44px]"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isRemoveListModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
@@ -179,8 +235,8 @@ export function Files() {
               </button>
               <button
                 onClick={() => {
-                  resetSession();
-                  toast.info("Attendance session reset.");
+                  clearScans();
+                  toast.info("Attendance records cleared.");
                   setIsClearScansModalOpen(false);
                 }}
                 className="flex-1 py-4 px-4 bg-gradient-to-r from-primary to-[#9e0520] hover:from-primary hover:to-[#a00018] text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-[0_8px_20px_rgba(200,16,46,0.25)] min-h-[44px]"
@@ -348,7 +404,7 @@ export function Files() {
                           </span>
                         </div>
                         <button
-                          onClick={() => exportData(yearMatch)}
+                          onClick={() => prepareExport(yearMatch)}
                           className="bg-gradient-to-r from-secondary to-[#0044cc] hover:from-secondary hover:to-[#0055ff] text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-all shadow-[0_4px_12px_rgba(0,51,160,0.2)] hover:shadow-[0_6px_16px_rgba(0,51,160,0.3)]"
                         >
                           Export
@@ -369,7 +425,7 @@ export function Files() {
                       </span>
                     </div>
                     <button
-                      onClick={() => exportData("All Reports")}
+                      onClick={() => prepareExport("All Reports")}
                       className="bg-gray-800 hover:bg-black text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-all shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.3)] min-h-[36px]"
                     >
                       Export All

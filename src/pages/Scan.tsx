@@ -21,10 +21,11 @@ export function Scan() {
   const [manualName, setManualName] = useState("");
   const [manualCourse, setManualCourse] = useState("");
   const [manualYear, setManualYear] = useState("1st Year");
-  const manualYearRef = useRef(manualYear);
+  const [activeYearLevel, setActiveYearLevel] = useState("1st Year");
+  const activeYearLevelRef = useRef(activeYearLevel);
   useEffect(() => {
-    manualYearRef.current = manualYear;
-  }, [manualYear]);
+    activeYearLevelRef.current = activeYearLevel;
+  }, [activeYearLevel]);
   const [filterYear, setFilterYear] = useState("All");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [scanMode, setScanMode] = useState<"camera" | "barcode">("camera");
@@ -133,8 +134,10 @@ export function Scan() {
 
   const handleScanSubmit = (id: string, overrideYear?: string) => {
     if (!id.trim()) return;
-    const activeYearToUse = overrideYear || manualYearRef.current;
-    const result = addScan(id.trim(), undefined, activeYearToUse);
+    const activeYearToUse = overrideYear || activeYearLevelRef.current;
+    const normalizedActiveYear =
+      activeYearToUse === "All Years" ? undefined : activeYearToUse;
+    const result = addScan(id.trim(), undefined, normalizedActiveYear);
     if (result.success) {
       toast.success(result.message, {
         description: `${result.student?.name} (${result.student?.id})`,
@@ -197,11 +200,27 @@ export function Scan() {
     setBarcodeInput(""); // reset for next scan
   };
 
-  const getYearBadgeColor = (year: string) => {
-    if (year.includes("1st")) return "bg-blue-100 text-blue-700";
-    if (year.includes("2nd")) return "bg-green-100 text-green-700";
-    if (year.includes("3rd")) return "bg-orange-100 text-orange-700";
-    if (year.includes("4th")) return "bg-purple-100 text-purple-700";
+  const getYearLevelNumber = (yearLevel: string) => {
+    const raw = String(yearLevel ?? "").trim();
+    if (!raw) return "";
+
+    const lowered = raw.toLowerCase();
+    if (/^[1-4]$/.test(lowered)) return lowered;
+    if (lowered.includes("1st") || lowered.includes("first")) return "1";
+    if (lowered.includes("2nd") || lowered.includes("second")) return "2";
+    if (lowered.includes("3rd") || lowered.includes("third")) return "3";
+    if (lowered.includes("4th") || lowered.includes("fourth")) return "4";
+
+    const digit = lowered.match(/[1-4]/)?.[0];
+    return digit ?? "";
+  };
+
+  const getYearBadgeColor = (yearLevel: string) => {
+    const year = getYearLevelNumber(yearLevel);
+    if (year === "1") return "bg-blue-100 text-blue-700";
+    if (year === "2") return "bg-green-100 text-green-700";
+    if (year === "3") return "bg-orange-100 text-orange-700";
+    if (year === "4") return "bg-purple-100 text-purple-700";
     return "bg-slate-100 text-slate-700";
   };
 
@@ -245,10 +264,17 @@ export function Scan() {
             {/* FIXED: wrapped in relative div with custom ChevronDown */}
             <div className="relative w-full sm:w-auto">
               <select
-                value={manualYear}
-                onChange={(e) => setManualYear(e.target.value)}
+                value={activeYearLevel}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setActiveYearLevel(next);
+                  if (next !== "All Years") {
+                    setManualYear(next);
+                  }
+                }}
                 className="appearance-none bg-white border border-gray-200/80 text-gray-800 text-sm font-bold rounded-2xl pl-4 pr-10 py-3.5 outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] cursor-pointer w-full min-h-[44px]"
               >
+                <option value="All Years">All Years</option>
                 <option value="1st Year">1st Year</option>
                 <option value="2nd Year">2nd Year</option>
                 <option value="3rd Year">3rd Year</option>
@@ -425,54 +451,68 @@ export function Scan() {
                 </p>
               </div>
             ) : (
-              filteredScans.slice(0, 4).map((scan, idx) => (
-                <div
-                  key={`${scan.id}-${idx}`}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-gray-50 bg-gray-50/30 transition-all hover:bg-gray-50 gap-2 sm:gap-0"
-                  style={{ opacity: 1 - idx * 0.25 }}
-                >
-                  <div className="flex items-center gap-3 w-full sm:w-1/3">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
-                      {scan.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .substring(0, 2)
-                        .toUpperCase()}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm text-gray-800 line-clamp-1">
-                        {scan.name}
-                      </span>
-                      <span className="font-mono text-gray-500 text-[10px] sm:hidden">
-                        {scan.id}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="hidden sm:block sm:w-1/4">
-                    <span className="font-mono text-gray-500 text-sm">
-                      {scan.id}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between w-full sm:w-5/12 pl-11 sm:pl-0">
-                    <div className="sm:w-1/2">
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded-full text-[10px] font-bold",
-                          getYearBadgeColor(scan.yearLevel),
-                        )}
-                      >
-                        {scan.yearLevel}
-                      </span>
-                    </div>
-                    <div className="sm:w-1/2 text-right">
-                      <span className="text-xs sm:text-sm text-gray-400 font-medium">
-                        {scan.timestamp}
-                      </span>
-                    </div>
+              <>
+                <div className="hidden sm:flex items-center justify-between px-3 text-[10px] font-semi text-gray-400 uppercase tracking-widest">
+                  <div className="sm:w-1/3">Name</div>
+                  <div className="sm:w-1/4">ID Number</div>
+                  <div className="sm:w-5/12 flex items-center justify-between">
+                    <div className="sm:w-1/2">Year Level</div>
+                    <div className="sm:w-1/2 text-right">Time Scanned</div>
                   </div>
                 </div>
-              ))
+
+                {filteredScans.slice(0, 4).map((scan, idx) => {
+                  const yearNumber = getYearLevelNumber(scan.yearLevel);
+                  return (
+                    <div
+                      key={`${scan.id}-${idx}`}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-gray-50 bg-gray-50/30 transition-all hover:bg-gray-50 gap-2 sm:gap-0"
+                      style={{ opacity: 1 - idx * 0.25 }}
+                    >
+                      <div className="flex items-center gap-3 w-full sm:w-1/3">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                          {scan.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .substring(0, 2)
+                            .toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-sm text-gray-800 line-clamp-1">
+                            {scan.name}
+                          </span>
+                          <span className="font-mono text-gray-500 text-[10px] sm:hidden">
+                            {scan.id}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="hidden sm:block sm:w-1/4">
+                        <span className="font-mono text-gray-500 text-sm">
+                          {scan.id}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between w-full sm:w-5/12 pl-11 sm:pl-0">
+                        <div className="sm:w-1/2">
+                          <span
+                            className={cn(
+                              "px-6 py-0.5 rounded-full text-[12px] font-bold",
+                              getYearBadgeColor(scan.yearLevel),
+                            )}
+                          >
+                            {yearNumber || "-"}
+                          </span>
+                        </div>
+                        <div className="sm:w-1/2 text-right">
+                          <span className="text-xs sm:text-sm text-gray-400 font-mono">
+                            {scan.timestamp}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
             )}
           </div>
         </div>
