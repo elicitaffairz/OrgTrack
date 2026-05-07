@@ -29,15 +29,21 @@ export function Scan() {
   }, [activeYearLevel]);
   const [filterYear, setFilterYear] = useState("All");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [scanMode, setScanMode] = useState<"camera" | "barcode">("camera");
+  const [scanMode, setScanMode] = useState<"camera" | "barcode">("barcode");
   const [barcodeInput, setBarcodeInput] = useState("");
 
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>("");
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const cameraAccessErrorShownRef = useRef(false);
 
   useEffect(() => {
+    if (scanMode !== "camera") {
+      cameraAccessErrorShownRef.current = false;
+      return;
+    }
+
     Html5Qrcode.getCameras()
       .then((devices) => {
         if (devices && devices.length) {
@@ -60,9 +66,12 @@ export function Scan() {
       })
       .catch((err) => {
         console.error("Error getting cameras", err);
-        toast.error("Could not access cameras. Please check permissions.");
+        if (!cameraAccessErrorShownRef.current) {
+          cameraAccessErrorShownRef.current = true;
+          toast.error("Could not access cameras. Please check permissions.");
+        }
       });
-  }, []);
+  }, [scanMode]);
 
   useEffect(() => {
     if (
@@ -299,7 +308,7 @@ export function Scan() {
 
         {/* Scanner Viewfinder Box */}
         {scanMode === "camera" ? (
-          <div className="bg-white rounded-3xl shadow-lg shadow-secondary/5 border border-white p-2 relative overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-lg shadow-secondary/5 border border-white p-2 relative overflow-hidden animate-fade-in-up">
             {/* Custom scan line animation wrapper */}
             <div className="relative w-full aspect-[4/3] sm:aspect-video bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center">
               {/* Cleaner Integrated Scanner UI overlay */}
@@ -344,7 +353,7 @@ export function Scan() {
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl shadow-lg shadow-secondary/5 border border-white p-6 sm:p-10 relative overflow-hidden flex flex-col items-center justify-center">
+          <div className="bg-white rounded-3xl shadow-lg shadow-secondary/5 border border-white p-6 sm:p-10 relative overflow-hidden flex flex-col items-center justify-center animate-fade-in-up">
             <div className="bg-gray-100 p-4 rounded-full mb-6">
               <Search className="w-8 h-8 text-secondary" />
             </div>
@@ -391,7 +400,7 @@ export function Scan() {
                   {filterYear} <ChevronDown className="w-4 h-4 ml-1" />
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-40 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_10px_40px_rgba(0,51,160,0.1)] border border-white z-30 py-2 overflow-hidden">
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-40 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_10px_40px_rgba(0,51,160,0.1)] border border-white z-30 py-2 overflow-hidden animate-pop-in">
                     {[
                       "All",
                       "1st Year",
@@ -451,9 +460,9 @@ export function Scan() {
                   const yearNumber = yearLevelToNumber(scan.yearLevel);
                   return (
                     <div
-                      key={`${scan.id}-${idx}`}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-gray-50 bg-gray-50/30 transition-all hover:bg-gray-50 gap-2 sm:gap-0"
-                      style={{ opacity: 1 - idx * 0.25 }}
+                      key={scan.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-gray-50 bg-gray-50/30 transition-all hover:bg-gray-50 gap-2 sm:gap-0 animate-fade-in-up"
+                      style={{ opacity: 1 - idx * 0.25, animationDelay: `${idx * 35}ms` }}
                     >
                       <div className="flex items-center gap-3 w-full sm:w-1/3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">

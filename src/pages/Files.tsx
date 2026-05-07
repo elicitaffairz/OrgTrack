@@ -188,7 +188,7 @@ export function Files() {
       {pendingExport && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
             onClick={() => {
               exportWorkbookRef.current = null;
               setPendingExport(null);
@@ -226,7 +226,7 @@ export function Files() {
       {isRemoveListModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setIsRemoveListModalOpen(false)}
           ></div>
           <div className="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 w-full max-w-sm relative z-10 shadow-[0_10px_40px_rgba(0,51,160,0.1)] scale-100 animate-in zoom-in-95 duration-200 border border-white">
@@ -262,7 +262,7 @@ export function Files() {
       {isClearScansModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setIsClearScansModalOpen(false)}
           ></div>
           <div className="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 w-full max-w-sm relative z-10 shadow-[0_10px_40px_rgba(0,51,160,0.1)] scale-100 animate-in zoom-in-95 duration-200 border border-white">
@@ -310,7 +310,7 @@ export function Files() {
       <div className="p-4 sm:p-6 mx-auto w-full max-w-4xl space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Import Section */}
-          <section className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,51,160,0.03)] border border-white">
+          <section className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,51,160,0.03)] border border-white animate-fade-in-up">
             <h2 className="text-xs font-bold text-gray-600 tracking-widest mb-4 uppercase">
               Import Masterlist
             </h2>
@@ -406,13 +406,30 @@ export function Files() {
             )}
           </section>
 
-          {/* Export Section */}
-          <section className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,51,160,0.03)] border border-white">
-            <h2 className="text-xs font-bold text-gray-600 tracking-widest mb-4 uppercase">
-              Export Reports
-            </h2>
+          {/* Export Column */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-4 rounded-[1.5rem] bg-secondary/10 border border-secondary/20 shadow-[0_2px_10px_rgba(0,51,160,0.06)] animate-fade-in-down">
+              <div className="bg-secondary/20 p-2 rounded-xl">
+                <FileDown className="w-4 h-4 text-secondary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[#0033A0] font-bold text-medium leading-tight mb-2">
+                  Heads Up!
+                </p>
+                <p className="text-xs text-[#0033A0]/80 font-medium leading-relaxed max-w-[250px]">
+                  Export attendance reports here. Select a year level, then click
+                  Export.
+                </p>
+              </div>
+            </div>
 
-            <div className="space-y-4">
+            {/* Export Section */}
+            <section className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,51,160,0.03)] border border-white animate-fade-in-up">
+              <h2 className="text-xs font-bold text-gray-600 tracking-widest mb-4 uppercase">
+                Export Reports
+              </h2>
+
+              <div className="space-y-4">
               {/* FIXED: wrapped in relative div with custom ChevronDown */}
               <div className="relative">
                 <select
@@ -431,7 +448,7 @@ export function Files() {
 
               <div className="space-y-2 mt-4">
                 {["1st-Year", "2nd-Year", "3rd-Year", "4th-Year"].map(
-                  (yearMatch) => {
+                  (yearMatch, idx) => {
                     if (
                       filter !== "All Reports" &&
                       !filter.includes(yearMatch.split("-")[0])
@@ -440,7 +457,8 @@ export function Files() {
                     return (
                       <div
                         key={yearMatch}
-                        className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                        className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors animate-fade-in-up"
+                        style={{ animationDelay: `${idx * 40}ms` }}
                       >
                         <div className="flex items-center gap-3">
                           <div className="bg-green-100 p-1.5 rounded-lg">
@@ -462,7 +480,10 @@ export function Files() {
                 )}
 
                 {filter === "All Reports" && (
-                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-100 mt-4">
+                  <div
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-100 mt-4 animate-fade-in-up"
+                    style={{ animationDelay: "200ms" }}
+                  >
                     <div className="flex items-center gap-3">
                       <div className="bg-gray-200 p-1.5 rounded-lg">
                         <FileDown className="w-4 h-4 text-gray-600" />
@@ -480,8 +501,9 @@ export function Files() {
                   </div>
                 )}
               </div>
-            </div>
-          </section>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </div>

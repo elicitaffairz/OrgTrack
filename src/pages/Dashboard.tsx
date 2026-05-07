@@ -49,7 +49,7 @@ export function Dashboard() {
         description: eventName ? `Session: ${eventName}` : "Ready to scan.",
         duration: 3500,
       });
-    }, 600);
+    }, 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -185,7 +185,7 @@ export function Dashboard() {
             }
             className="text-[10px] uppercase font-bold text-white bg-white/20 px-3 py-1.5 rounded-lg border border-white/30"
           >
-            End
+            End session
           </button>
         </div>
       </header>

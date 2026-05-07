@@ -27,6 +27,22 @@ body {
   .zoom-in-95 {
     animation-name: zoom-in-95;
   }
+
+  .animate-fade-in {
+    animation: fade-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-fade-in-down {
+    animation: fade-in-down 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-pop-in {
+    animation: pop-in 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
 @keyframes animate-in {
@@ -42,6 +58,48 @@ body {
   from {
     opacity: 0;
     transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
