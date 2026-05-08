@@ -212,10 +212,10 @@ export function Scan() {
 
   const getYearBadgeColor = (yearLevel: string) => {
     const year = yearLevelToNumber(yearLevel);
-    if (year === "1") return "bg-blue-100 text-blue-700";
-    if (year === "2") return "bg-green-100 text-green-700";
-    if (year === "3") return "bg-orange-100 text-orange-700";
-    if (year === "4") return "bg-purple-100 text-purple-700";
+    if (year === "1") return "bg-green-100 text-green-700";
+    if (year === "2") return "bg-yellow-100 text-yellow-700";
+    if (year === "3") return "bg-red-100 text-red-700";
+    if (year === "4") return "bg-blue-100 text-blue-700";
     return "bg-slate-100 text-slate-700";
   };
 
@@ -459,7 +459,12 @@ export function Scan() {
                       style={{ opacity: 1 - idx * 0.25, animationDelay: `${idx * 35}ms` }}
                     >
                       <div className="flex items-center gap-3 w-full sm:w-1/3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                        <div
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0",
+                            getYearBadgeColor(scan.yearLevel),
+                          )}
+                        >
                           {scan.name
                             .split(" ")
                             .map((n) => n[0])
