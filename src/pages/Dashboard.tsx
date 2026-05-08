@@ -172,12 +172,6 @@ export function Dashboard() {
           <Users className="header-icon w-5 h-5 text-white/80" />
           Dashboard
         </h2>
-        <div className="dash-status hidden sm:block text-right">
-          <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest">
-            System Status
-          </p>
-          <p className="text-sm font-bold status-active">Active</p>
-        </div>
         <div className="sm:hidden">
           <button
             onClick={() =>

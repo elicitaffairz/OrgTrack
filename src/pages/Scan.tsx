@@ -236,12 +236,6 @@ export function Scan() {
           </button>
           <h2 className="text-lg sm:text-xl font-bold text-white">Live Scan</h2>
         </div>
-        <div className="hidden sm:block text-right">
-          <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest">
-            Scanner Status
-          </p>
-          <p className="text-sm font-bold text-green-400">Online</p>
-        </div>
       </header>
 
       <div className="p-4 sm:p-6 mx-auto w-full max-w-4xl space-y-6">
