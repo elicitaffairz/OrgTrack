@@ -16,7 +16,7 @@ import { yearLevelToNumber } from "../utils/yearLevel";
 
 export function Scan() {
   const navigate = useNavigate();
-  const { scans, addScan } = useAttendanceStore();
+  const { scans, addScan, masterlist, masterlistFilename } = useAttendanceStore();
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [manualId, setManualId] = useState("");
   const [manualName, setManualName] = useState("");
@@ -37,6 +37,28 @@ export function Scan() {
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const cameraAccessErrorShownRef = useRef(false);
+  const hasPromptedImportRef = useRef(false);
+
+  const maybePromptImportMasterlist = () => {
+    const hasImportedMasterlist = Boolean(masterlistFilename);
+    const hasAnyMasterlistData = masterlist.length > 0;
+    const shouldPrompt = !hasImportedMasterlist && !hasAnyMasterlistData;
+    if (!shouldPrompt || hasPromptedImportRef.current) return;
+    hasPromptedImportRef.current = true;
+
+    toast.info("No masterlist imported yet", {
+      description:
+        "Import a masterlist to auto-fill names. You can continue using manual entry.",
+      action: {
+        label: "Import",
+        onClick: () => navigate("/files"),
+      },
+      cancel: {
+        label: "Not now",
+        onClick: () => {},
+      },
+    });
+  };
 
   useEffect(() => {
     if (scanMode !== "camera") {
@@ -144,6 +166,7 @@ export function Scan() {
 
   const handleScanSubmit = (id: string, overrideYear?: string) => {
     if (!id.trim()) return;
+    maybePromptImportMasterlist();
     const activeYearToUse = overrideYear || activeYearLevelRef.current;
     const normalizedActiveYear =
       activeYearToUse === "All Years" ? undefined : activeYearToUse;
@@ -157,9 +180,11 @@ export function Scan() {
         description: `${result.student?.name} has already been stamped.`,
       });
     } else if (result.code === "NOT_FOUND") {
-      toast.info("New ID Detected", {
-        description: "Please enter student info for this new ID.",
-      });
+      if (masterlist.length > 0) {
+        toast.info("New ID Detected", {
+          description: "Please enter student info for this new ID.",
+        });
+      }
       setManualId(id.trim());
       setManualName("");
       setManualCourse("");
@@ -173,6 +198,8 @@ export function Scan() {
   const onManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualId.trim()) return;
+
+    maybePromptImportMasterlist();
 
     const result = addScan(
       manualId,
