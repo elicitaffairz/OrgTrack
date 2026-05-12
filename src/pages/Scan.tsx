@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Html5Qrcode, CameraDevice } from "html5-qrcode";
+import {
+  Html5Qrcode,
+  CameraDevice,
+  Html5QrcodeSupportedFormats,
+} from "html5-qrcode";
 import {
   ChevronLeft,
   UserPlus,
@@ -34,10 +38,15 @@ export function Scan() {
 
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>("");
+  const [cameraStatus, setCameraStatus] = useState<
+    "idle" | "loading" | "ready" | "unavailable"
+  >("idle");
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const cameraAccessErrorShownRef = useRef(false);
   const hasPromptedImportRef = useRef(false);
+  const userSelectedCameraRef = useRef(false);
 
   const maybePromptImportMasterlist = () => {
     const hasImportedMasterlist = Boolean(masterlistFilename);
@@ -63,31 +72,58 @@ export function Scan() {
   useEffect(() => {
     if (scanMode !== "camera") {
       cameraAccessErrorShownRef.current = false;
+      setCameraStatus("idle");
+      setCameraError(null);
       return;
     }
 
+    setCameraStatus("loading");
+    setCameraError(null);
+
     Html5Qrcode.getCameras()
       .then((devices) => {
+        if (!devices || devices.length === 0) {
+          setCameras([]);
+          setSelectedCameraId("");
+          setCameraStatus("unavailable");
+          setCameraError("No camera detected.");
+          return;
+        }
+
         if (devices && devices.length) {
           setCameras(devices);
 
-          // Try to find the back/environment camera first
-          const environmentCamera = devices.find(
-            (device) =>
-              device.label.toLowerCase().includes("back") ||
-              device.label.toLowerCase().includes("environment") ||
-              device.label.toLowerCase().includes("rear")
-          );
+          if (!userSelectedCameraRef.current) {
+            // Prefer rear/environment camera. If labels are blank (common before permission),
+            // default to the last device (often rear on mobile).
+            const environmentCamera = devices.find((device) => {
+              const label = (device.label || "").toLowerCase();
+              return (
+                label.includes("back") ||
+                label.includes("environment") ||
+                label.includes("rear")
+              );
+            });
 
-          if (environmentCamera) {
-            setSelectedCameraId(environmentCamera.id);
-          } else {
-            setSelectedCameraId(devices[0].id);
+            if (environmentCamera) {
+              setSelectedCameraId(environmentCamera.id);
+            } else {
+              const allLabelsBlank = devices.every((d) => !d.label);
+              setSelectedCameraId(
+                allLabelsBlank ? devices[devices.length - 1].id : devices[0].id,
+              );
+            }
           }
+
+          setCameraStatus("ready");
         }
       })
       .catch((err) => {
         console.error("Error getting cameras", err);
+        setCameras([]);
+        setSelectedCameraId("");
+        setCameraStatus("unavailable");
+        setCameraError("Please check permissions.");
         if (!cameraAccessErrorShownRef.current) {
           cameraAccessErrorShownRef.current = true;
           toast.error("Could not access cameras. Please check permissions.");
@@ -98,24 +134,62 @@ export function Scan() {
   useEffect(() => {
     if (
       scanMode !== "camera" ||
-      !selectedCameraId ||
       !document.getElementById("reader")
     )
       return;
 
     let isMounted = true;
     let isStarting = true;
-    const html5QrCode = new Html5Qrcode("reader");
+    const html5QrCode = new Html5Qrcode("reader", {
+      verbose: false,
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.ITF,
+        Html5QrcodeSupportedFormats.CODABAR,
+      ],
+      useBarCodeDetectorIfSupported: true,
+    });
     scannerRef.current = html5QrCode;
 
     let lastScanTime = 0;
 
+    const allLabelsBlank = cameras.length > 0 && cameras.every((d) => !d.label);
+    const cameraIdOrConfig:
+      | string
+      | {
+          facingMode: "environment";
+        } =
+      !userSelectedCameraRef.current && allLabelsBlank
+        ? { facingMode: "environment" }
+        : selectedCameraId;
+
+    if (typeof cameraIdOrConfig === "string" && !cameraIdOrConfig) {
+      setCameraStatus("unavailable");
+      return;
+    }
+
+    setCameraStatus("loading");
+    setCameraError(null);
+
     html5QrCode
       .start(
-        selectedCameraId,
+        cameraIdOrConfig,
         {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }, // Square box for QR Code
+          fps: 15,
+          qrbox: { width: 250, height: 250 }, // Square box for QR Code + barcodes
+          disableFlip: true,
+          // Improve scan reliability under varied lighting by requesting higher resolution.
+          videoConstraints: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
         },
         (decodedText) => {
           // Basic debounce for scanning
@@ -130,6 +204,7 @@ export function Scan() {
       )
       .then(() => {
         isStarting = false;
+        setCameraStatus("ready");
         if (!isMounted) {
           html5QrCode
             .stop()
@@ -140,6 +215,8 @@ export function Scan() {
       .catch((err) => {
         isStarting = false;
         console.error("Error starting scanner", err);
+        setCameraStatus("unavailable");
+        setCameraError("Camera unavailable.");
       });
 
     return () => {
@@ -162,7 +239,7 @@ export function Scan() {
         }
       }
     };
-  }, [selectedCameraId, scanMode]);
+  }, [selectedCameraId, scanMode, cameras]);
 
   const handleScanSubmit = (id: string, overrideYear?: string) => {
     if (!id.trim()) return;
@@ -333,11 +410,29 @@ export function Scan() {
             {/* Custom scan line animation wrapper */}
             <div className="relative w-full aspect-[4/3] sm:aspect-video bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center">
               {/* Cleaner Integrated Scanner UI overlay */}
-              <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                <div className="w-[250px] h-[250px] rounded-xl relative">
-                  <div className="w-full h-[2px] bg-red-500 blur-[1px] absolute top-1/2 -translate-y-1/2 animate-[scan-line_3s_ease-in-out_infinite] shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
+              {cameraStatus === "ready" && (
+                <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                  <div className="w-[250px] h-[250px] rounded-xl relative">
+                    <div className="w-full h-[2px] bg-red-500 blur-[1px] absolute top-1/2 -translate-y-1/2 animate-[scan-line_3s_ease-in-out_infinite] shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {cameraStatus !== "ready" && (
+                <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center p-6 text-center">
+                  <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 px-4 py-3">
+                    <p className="text-white text-xs font-bold uppercase tracking-widest">
+                      {cameraStatus === "loading" ? "Starting camera" : "Camera unavailable"}
+                    </p>
+                    <p className="text-white/80 text-xs font-medium mt-2 max-w-xs">
+                      {cameraStatus === "loading"
+                        ? "Waiting for camera access…"
+                        : cameraError ||
+                          "Please check device permissions or use Barcode/Manual."}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div
                 id="reader"
@@ -354,7 +449,10 @@ export function Scan() {
                   </div>
                   <select
                     value={selectedCameraId}
-                    onChange={(e) => setSelectedCameraId(e.target.value)}
+                    onChange={(e) => {
+                      userSelectedCameraRef.current = true;
+                      setSelectedCameraId(e.target.value);
+                    }}
                     className="bg-transparent border-none text-xs font-bold text-white py-2 pr-6 focus:ring-0 focus:outline-none appearance-none cursor-pointer placeholder:text-white"
                   >
                     {cameras.map((camera) => (
