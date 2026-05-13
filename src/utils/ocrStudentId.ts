@@ -98,9 +98,8 @@ export function analyzeImageQuality(imageData: ImageData): ImageQuality {
   const mean = n ? sum / n : 0;
   const variance = n ? Math.max(0, sumSq / n - mean * mean) : 0;
 
-  // Tuned for typical webcam/mobile frames.
-  const tooDark = avgLuminance < 55;
-  const tooBlurry = variance < 120;
+  const tooDark = avgLuminance < 45;
+  const tooBlurry = variance < 60;
 
   return {
     avgLuminance,

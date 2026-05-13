@@ -382,7 +382,10 @@ export function Scan() {
       const frameData = ctx.getImageData(0, 0, rawCanvas.width, rawCanvas.height);
       const quality = analyzeImageQuality(frameData);
 
-      if (quality.tooDark) {
+      const EXTREME_DARK_LUMINANCE = 25;
+      const EXTREME_BLUR_VARIANCE = 12;
+
+      if (quality.avgLuminance < EXTREME_DARK_LUMINANCE) {
         toast.warning("Image is too dark", {
           description: "Add more light and try again, or enter the ID manually.",
           action: {
@@ -402,7 +405,7 @@ export function Scan() {
         return;
       }
 
-      if (quality.tooBlurry) {
+      if (quality.laplacianVariance < EXTREME_BLUR_VARIANCE) {
         toast.warning("Image is too blurry", {
           description: "Hold steady and move closer, then retake — or enter the ID manually.",
           action: {
@@ -420,6 +423,44 @@ export function Scan() {
           },
         });
         return;
+      }
+
+      if (quality.tooDark) {
+        toast.warning("Image is too dark", {
+          description: "Add more light and try again, or enter the ID manually.",
+          action: {
+            label: "Manual",
+            onClick: () => {
+              setManualId("");
+              setManualName("");
+              setManualCourse("");
+              setManualModalOpen(true);
+            },
+          },
+          cancel: {
+            label: "Retake",
+            onClick: () => {},
+          },
+        });
+      }
+
+      if (quality.tooBlurry) {
+        toast.warning("Image is too blurry", {
+          description: "Hold steady and move closer, then retake — or enter the ID manually.",
+          action: {
+            label: "Manual",
+            onClick: () => {
+              setManualId("");
+              setManualName("");
+              setManualCourse("");
+              setManualModalOpen(true);
+            },
+          },
+          cancel: {
+            label: "Retake",
+            onClick: () => {},
+          },
+        });
       }
 
       preprocessed = preprocessCanvasForNumericOcr(rawCanvas);
@@ -456,7 +497,7 @@ export function Scan() {
 
       const worker = ocrWorkerRef.current;
       const result = await worker.recognize(preprocessed);
-      const text = result?.data?.text ?? "";
+      let text = result?.data?.text ?? "";
 
       const extracted = extractStudentId(text);
       if (extracted && validateStudentId(extracted)) {
@@ -464,6 +505,33 @@ export function Scan() {
         toast.success("ID detected", { description: extracted });
         handleScanSubmit(extracted);
         return;
+      }
+
+      try {
+        await worker.setParameters({
+          tessedit_pageseg_mode: PSM?.SINGLE_BLOCK ?? 6,
+        });
+        const retry = await worker.recognize(preprocessed);
+        text = retry?.data?.text ?? text;
+
+        const extractedRetry = extractStudentId(text);
+        if (extractedRetry && validateStudentId(extractedRetry)) {
+          setBarcodeInput(extractedRetry);
+          toast.success("ID detected", { description: extractedRetry });
+          handleScanSubmit(extractedRetry);
+          return;
+        }
+      } catch {
+        // ignore retry failures; fall through to manual/retake prompt
+      } finally {
+        // Restore the primary setting for the next attempt.
+        try {
+          await worker.setParameters({
+            tessedit_pageseg_mode: PSM?.SINGLE_LINE ?? 7,
+          });
+        } catch {
+          // ignore
+        }
       }
 
       const bestDigits = extractBestDigitsCandidate(text);
