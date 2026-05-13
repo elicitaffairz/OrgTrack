@@ -1,50 +1,22 @@
 # OrgTrack
 
-**OrgTrack** is a responsive, web-based attendance monitoring system tailored for event organizers, faculty, and student organization officers. It streamlines the recording and management of event attendees through rapid QR and barcode scanning, transitioning away from high-friction, error-prone manual administrative tasks into a seamless digital experience. 
+OrgTrack is a web-based attendance tool for events. Import a masterlist, scan IDs, and export reports. No login required—data is stored locally in the browser.
 
-No login required and it saves data with local storage. Works on any device with a browser. Try it now!
+## Core features
+- Import masterlist (`.csv`, `.xlsx`)
+- Scan IDs using:
+  - Camera (QR + 1D barcodes)
+  - USB/Bluetooth hardware barcode scanners
+  - OCR fallback (Tesseract.js) if barcode decoding fails
+- Prevent duplicate scans
+- Dashboard totals + year-level breakdown
+- Export attendance to Excel
 
-## ✨ Features
+## Tech
+React + Vite + TypeScript, Tailwind CSS, Zustand (localStorage), html5-qrcode, Tesseract.js, xlsx/papaparse
 
-- **Masterlist Importation**: Easily upload `.csv` and `.xlsx` files to prepopulate the student database before an event.
-- **Integrated Camera Scanner**: Uses device cameras built into laptops, tablets, and phones to read both QR codes and 1D barcodes.
-- **Hardware Scanner Support**: Seamlessly captures input from USB or Bluetooth physical barcode scanners.
-- **Manual Entry Fallback**: An intuitive form allowing manual input of student details if scanning fails or a participant does not have their ID.
-- **Real-Time Dashboard**: Visualizes total students, total attendees, and percentage breakdowns by year level in real-time.
-- **Data Export**: One-click export of attendance data to a formatted Excel file for post-event reporting.
-- **Offline & Privacy Focused**: Utilizes client-side local storage. Data is saved natively on the device's browser, preventing data loss without requiring an immediate backend database connection.
-
-## 🛠️ Tech Stack
-
-- **Frontend Framework**: React (with Vite)
-- **Programming Language**: TypeScript
-- **Styling**: Tailwind CSS, Lucide React (Icons)
-- **State Management**: Zustand
-- **Scanner Integration**: `html5-qrcode`
-- **Spreadsheet Parsing**: `xlsx`
-
-## 🚀 How to Use
-
-1. **Upload Masterlist**: Head to the **Files** tab and upload an Excel/CSV file containing your expected attendees' list (must include an ID column, and optionally Name, Course, and Year level).
-2. **Scan Attendees**: Head to the **Scan** tab. Switch to "Camera Scanner" mode to utilize your device's camera for QR or barcode scanning. Alternatively, connect a physical USB/Bluetooth scanner and use the "Barcode Scanner" mode.
-3. **Analyze the Turnout**: Navigate to the **Dashboard** to see real-time updates:
-   - Total students registered vs. total attendees.
-   - Scan distributions broken down by academic year.
-4. **Export the Results**: Once the event concludes, go back to the **Files** tab and click "Export to Excel" to download a consolidated spreadsheet of the actual attendees with timestamps.
-5. **End Session**: Click "End Session" in the Dashboard or Files page to securely clear the current event data and prepare for the next event.
-
-## 📦 Setup and Development
-
-To run this application locally:
-
+## Run locally
 ```bash
-# Install dependencies
 npm install
-npm i --save-dev @types/react
-
-# Start the development server
 npm run dev
-
-# Build for production
 npm run build
-```
