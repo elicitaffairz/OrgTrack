@@ -17,6 +17,13 @@ import { useAttendanceStore } from "../store";
 import { toast } from "sonner";
 import { cn } from "../components/Layout";
 import { yearLevelToNumber } from "../utils/yearLevel";
+import {
+  analyzeImageQuality,
+  extractBestDigitsCandidate,
+  extractStudentId,
+  preprocessCanvasForNumericOcr,
+  validateStudentId,
+} from "../utils/ocrStudentId";
 
 export function Scan() {
   const navigate = useNavigate();
@@ -47,6 +54,11 @@ export function Scan() {
   const cameraAccessErrorShownRef = useRef(false);
   const hasPromptedImportRef = useRef(false);
   const userSelectedCameraRef = useRef(false);
+
+  const ocrWorkerRef = useRef<any | null>(null);
+  const [ocrStatus, setOcrStatus] = useState<"idle" | "processing">("idle");
+  const [ocrProgress, setOcrProgress] = useState<number | null>(null);
+  const ocrRunLockRef = useRef(false);
 
   const maybePromptImportMasterlist = () => {
     const hasImportedMasterlist = Boolean(masterlistFilename);
@@ -241,6 +253,16 @@ export function Scan() {
     };
   }, [selectedCameraId, scanMode, cameras]);
 
+  useEffect(() => {
+    return () => {
+      const worker = ocrWorkerRef.current;
+      if (worker && typeof worker.terminate === "function") {
+        Promise.resolve(worker.terminate()).catch(() => {});
+      }
+      ocrWorkerRef.current = null;
+    };
+  }, []);
+
   const handleScanSubmit = (id: string, overrideYear?: string) => {
     if (!id.trim()) return;
     maybePromptImportMasterlist();
@@ -312,6 +334,181 @@ export function Scan() {
     if (!barcodeInput.trim()) return;
     handleScanSubmit(barcodeInput);
     setBarcodeInput(""); // reset for next scan
+  };
+
+  const captureFrameFromReaderVideo = (): HTMLCanvasElement | null => {
+    const video = document.querySelector<HTMLVideoElement>("#reader video");
+    if (!video) return null;
+    if (video.readyState < 2) return null;
+
+    const width = video.videoWidth || video.clientWidth;
+    const height = video.videoHeight || video.clientHeight;
+    if (!width || !height) return null;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.drawImage(video, 0, 0, width, height);
+    return canvas;
+  };
+
+  const runOcrFallback = async () => {
+    if (ocrRunLockRef.current) return;
+    if (scanMode !== "camera" || cameraStatus !== "ready") {
+      toast.error("Camera is not ready.");
+      return;
+    }
+
+    const rawCanvas = captureFrameFromReaderVideo();
+    if (!rawCanvas) {
+      toast.error("Could not capture camera frame.");
+      return;
+    }
+
+    ocrRunLockRef.current = true;
+    setOcrStatus("processing");
+    setOcrProgress(null);
+
+    let preprocessed: HTMLCanvasElement | null = null;
+    try {
+      const ctx = rawCanvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) {
+        toast.error("Could not analyze camera frame.");
+        return;
+      }
+
+      const frameData = ctx.getImageData(0, 0, rawCanvas.width, rawCanvas.height);
+      const quality = analyzeImageQuality(frameData);
+
+      if (quality.tooDark) {
+        toast.warning("Image is too dark", {
+          description: "Add more light and try again, or enter the ID manually.",
+          action: {
+            label: "Manual",
+            onClick: () => {
+              setManualId("");
+              setManualName("");
+              setManualCourse("");
+              setManualModalOpen(true);
+            },
+          },
+          cancel: {
+            label: "Retake",
+            onClick: () => {},
+          },
+        });
+        return;
+      }
+
+      if (quality.tooBlurry) {
+        toast.warning("Image is too blurry", {
+          description: "Hold steady and move closer, then retake — or enter the ID manually.",
+          action: {
+            label: "Manual",
+            onClick: () => {
+              setManualId("");
+              setManualName("");
+              setManualCourse("");
+              setManualModalOpen(true);
+            },
+          },
+          cancel: {
+            label: "Retake",
+            onClick: () => {},
+          },
+        });
+        return;
+      }
+
+      preprocessed = preprocessCanvasForNumericOcr(rawCanvas);
+
+      const tesseract = await import("tesseract.js");
+      const createWorker = (tesseract as any).createWorker as any;
+      const PSM = (tesseract as any).PSM as any;
+      const OEM = (tesseract as any).OEM as any;
+
+      if (!ocrWorkerRef.current) {
+        ocrWorkerRef.current = await createWorker(
+          "eng",
+          OEM?.LSTM_ONLY ?? 1,
+          {
+            workerPath: "/tesseract/worker.min.js",
+            corePath: "/tesseract-core",
+            langPath: "/tessdata",
+            gzip: true,
+            logger: (m: any) => {
+              if (m?.status === "recognizing text" && typeof m?.progress === "number") {
+                setOcrProgress(m.progress);
+              }
+            },
+          },
+        );
+
+        await ocrWorkerRef.current.setParameters({
+          tessedit_char_whitelist: "0123456789",
+          tessedit_pageseg_mode: PSM?.SINGLE_LINE ?? 7,
+          preserve_interword_spaces: "1",
+          user_defined_dpi: "300",
+        });
+      }
+
+      const worker = ocrWorkerRef.current;
+      const result = await worker.recognize(preprocessed);
+      const text = result?.data?.text ?? "";
+
+      const extracted = extractStudentId(text);
+      if (extracted && validateStudentId(extracted)) {
+        setBarcodeInput(extracted);
+        toast.success("ID detected", { description: extracted });
+        handleScanSubmit(extracted);
+        return;
+      }
+
+      const bestDigits = extractBestDigitsCandidate(text);
+      toast.error("Couldn’t detect a valid 8-digit ID", {
+        description: bestDigits ? `Detected: ${bestDigits}` : "Retake the image or enter manually.",
+        action: {
+          label: "Manual",
+          onClick: () => {
+            setManualId(bestDigits && /^\d+$/.test(bestDigits) ? bestDigits : "");
+            setManualName("");
+            setManualCourse("");
+            setManualModalOpen(true);
+          },
+        },
+        cancel: {
+          label: "Retake",
+          onClick: () => {},
+        },
+      });
+    } catch (err) {
+      console.error("OCR error", err);
+      toast.error("OCR failed", {
+        description: "Please retake the image or enter the ID manually.",
+      });
+    } finally {
+      // Clear canvases to avoid keeping image buffers around.
+      try {
+        rawCanvas.width = 0;
+        rawCanvas.height = 0;
+      } catch {
+        // ignore
+      }
+      try {
+        if (preprocessed) {
+          preprocessed.width = 0;
+          preprocessed.height = 0;
+        }
+      } catch {
+        // ignore
+      }
+
+      setOcrStatus("idle");
+      setOcrProgress(null);
+      ocrRunLockRef.current = false;
+    }
   };
 
   const getYearBadgeColor = (yearLevel: string) => {
@@ -439,10 +636,25 @@ export function Scan() {
                 className="w-full relative z-10 [&_video]:object-cover"
                 style={{ minHeight: "200px" }}
               ></div>
+
+              {ocrStatus === "processing" && (
+                <div className="absolute inset-0 z-40 flex items-center justify-center p-6 text-center">
+                  <div className="bg-black/55 backdrop-blur-md rounded-2xl border border-white/10 px-4 py-3 pointer-events-auto">
+                    <p className="text-white text-xs font-bold uppercase tracking-widest">
+                      Reading ID…
+                    </p>
+                    <p className="text-white/80 text-xs font-medium mt-2 max-w-xs">
+                      {typeof ocrProgress === "number"
+                        ? `OCR in progress (${Math.round(ocrProgress * 100)}%)`
+                        : "Processing image…"}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {cameras.length > 1 && (
-              <div className="absolute top-6 right-6 z-30">
+            <div className="absolute top-6 right-6 z-30 flex flex-col items-end gap-2">
+              {cameras.length > 1 && (
                 <div className="relative bg-black/40 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden flex items-center pr-2 transition-all hover:bg-black/60">
                   <div className="pl-3 pr-2 py-2.5 text-white/80">
                     <Camera className="w-4 h-4" />
@@ -457,15 +669,28 @@ export function Scan() {
                   >
                     {cameras.map((camera) => (
                       <option key={camera.id} value={camera.id}>
-                        {camera.label ||
-                          `Camera ${camera.id.substring(0, 5)}...`}
+                        {camera.label || `Camera ${camera.id.substring(0, 5)}...`}
                       </option>
                     ))}
                   </select>
                   <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2 pointer-events-none" />
                 </div>
-              </div>
-            )}
+              )}
+
+              <button
+                onClick={runOcrFallback}
+                disabled={cameraStatus !== "ready" || ocrStatus === "processing"}
+                className={cn(
+                  "relative bg-black/40 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden flex items-center gap-2 px-3 py-2 transition-all hover:bg-black/60",
+                  (cameraStatus !== "ready" || ocrStatus === "processing") &&
+                    "opacity-50 cursor-not-allowed",
+                )}
+                title="Capture frame and read ID using OCR"
+              >
+                <Search className="w-4 h-4 text-white/80" />
+                <span className="text-xs font-bold text-white">Use OCR</span>
+              </button>
+            </div>
 
             <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 z-30">
               Live Camera Feed

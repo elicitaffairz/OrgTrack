@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "postinstall": "node scripts/copy-tesseract-assets.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -21,6 +22,7 @@
     "react-router-dom": "^7.14.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
+    "tesseract.js": "^6.0.0",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.12"
   },

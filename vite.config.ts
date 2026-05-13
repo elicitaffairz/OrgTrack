@@ -12,6 +12,11 @@ export default defineConfig(() => ({
     VitePWA({
       registerType: 'autoUpdate',
 
+      workbox: {
+        // Include OCR static assets (wasm + gz) in precache so OCR works offline.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm,gz,json}'],
+      },
+
       manifest: {
         name: 'OrgTrack',
         short_name: 'OrgTrack',
