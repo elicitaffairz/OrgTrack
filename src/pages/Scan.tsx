@@ -42,6 +42,7 @@ export function Scan() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [scanMode, setScanMode] = useState<"camera" | "barcode">("barcode");
   const [barcodeInput, setBarcodeInput] = useState("");
+  const barcodeSubmitLockRef = useRef(false);
 
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>("");
@@ -331,9 +332,30 @@ export function Scan() {
 
   const onBarcodeScannerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!barcodeInput.trim()) return;
-    handleScanSubmit(barcodeInput);
-    setBarcodeInput(""); // reset for next scan
+    submitBarcodeInput("submit");
+  };
+
+  const submitBarcodeInput = (source: "submit" | "blur" | "enter") => {
+    const value = barcodeInput.trim();
+    if (!value) return;
+    if (barcodeSubmitLockRef.current) return;
+
+    if (!validateStudentId(value)) {
+      if (source !== "blur") {
+        toast.error("Invalid ID", {
+          description: "Please enter a valid 8-digit ID number.",
+        });
+      }
+      return;
+    }
+
+    barcodeSubmitLockRef.current = true;
+    handleScanSubmit(value);
+    setBarcodeInput("");
+
+    window.setTimeout(() => {
+      barcodeSubmitLockRef.current = false;
+    }, 120);
   };
 
   const captureFrameFromReaderVideo = (): HTMLCanvasElement | null => {
@@ -677,7 +699,7 @@ export function Scan() {
               {/* Cleaner Integrated Scanner UI overlay */}
               {cameraStatus === "ready" && (
                 <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                  <div className="w-[250px] h-[250px] rounded-xl relative">
+                  <div className="w-[min(250px,80%)] h-[min(250px,80%)] rounded-xl relative">
                     <div className="w-full h-[2px] bg-red-500 blur-[1px] absolute top-1/2 -translate-y-1/2 animate-[scan-line_3s_ease-in-out_infinite] shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
                   </div>
                 </div>
@@ -701,8 +723,7 @@ export function Scan() {
 
               <div
                 id="reader"
-                className="w-full relative z-10 [&_video]:object-cover"
-                style={{ minHeight: "200px" }}
+                className="absolute inset-0 w-full h-full z-10 [&_video]:w-full [&_video]:h-full [&_video]:object-cover [&_canvas]:w-full [&_canvas]:h-full"
               ></div>
 
               {ocrStatus === "processing" && (
@@ -782,14 +803,32 @@ export function Scan() {
               onSubmit={onBarcodeScannerSubmit}
               className="w-full max-w-md relative"
             >
+              <button
+                type="submit"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+              >
+                Submit
+              </button>
               <input
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
+                enterKeyHint="done"
                 autoFocus
                 placeholder="Scan or enter ID number"
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value.replace(/\D/g, ""))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === "NumpadEnter") {
+                    e.preventDefault();
+                    submitBarcodeInput("enter");
+                  }
+                }}
+                onBlur={() => {
+                  submitBarcodeInput("blur");
+                }}
                 className="w-full bg-white border-2 border-gray-200 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 placeholder:text-gray-300 placeholder:text-sm sm:placeholder:text-base focus:outline-none focus:ring-4 focus:ring-secondary/10 focus:border-secondary transition-all text-base sm:text-lg font-mono font-bold text-center shadow-inner"
               />
             </form>

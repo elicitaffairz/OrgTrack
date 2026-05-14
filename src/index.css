@@ -17,6 +17,14 @@ body {
   color: #0f172a;
 }
 
+/* Ensure html5-qrcode injected media fills the responsive camera frame. */
+#reader video,
+#reader canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
 @layer utilities {
   .animate-in {
     animation-name: animate-in;
